@@ -1,0 +1,28 @@
+<div mat-dialog-title>
+  <h1 mat-dialog-title>Зверніть увагу</h1>
+  <button mat-icon-button class="icon" aria-label="Close" mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div mat-dialog-content>
+  <p>
+    Перевірте налаштування вашого смартфону – схоже, <b>не включений</b> режим
+    точної геолокації <b>«Precise Location»</b> для браузера
+    <span>{{ deviceInfo.browser }}</span
+    >.
+  </p>
+  <p *ngIf="is_iOS">
+    Перейдіть у меню Параметри «Settings» > Приватність «Privacy» > Служби
+    локації «Location Services» > <b>«{{ deviceInfo.browser }}»</b> та ввімкніть
+    опцію <b>«Precise Location»</b> <mat-icon>toggle_on</mat-icon>.
+  </p>
+</div>
+<div mat-dialog-actions *ngIf="is_iOS">
+  <a
+    href="App-prefs://prefs:root=Privacy&path=LOCATION"
+    target="_blank"
+    mat-flat-button
+    color="warn"
+    >Перейти до налаштувань</a
+  >
+</div>
