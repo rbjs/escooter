@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --ssl --port 4040",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "web": "ng deploy --base-href / && cp -R dist/escooter/* ../rbjs.github.io/  && cp ../rbjs.github.io/index.html ../rbjs.github.io/404.html "
   },
   "private": true,
   "dependencies": {

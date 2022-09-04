@@ -2,14 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PageNotFoundComponent } from './errors/page-not-found/page-not-found.component';
 
-// const routes: Routes = []
 const routes: Routes = [
-  // { path: '', redirectTo: 'user/login', pathMatch: 'prefix' },
-  { path: '', redirectTo: 'map', pathMatch: 'full' },
+  { path: '', redirectTo: 'lviv', pathMatch: 'full' },
   {
-    path: 'map',
-    loadChildren: () =>
-      import('./map/map.module').then((m) => m.MapModule),
+    path: 'lviv',
+    loadChildren: () => import('./map/map.module').then((m) => m.MapModule),
   },
   {
     path: 'deeplink',
@@ -18,10 +15,9 @@ const routes: Routes = [
   },
   {
     path: 'user',
-    loadChildren: () =>
-      import('./user/user.module').then((m) => m.UserModule),
+    loadChildren: () => import('./user/user.module').then((m) => m.UserModule),
   },
-  { path: '**', component: PageNotFoundComponent },  
+  { path: '**', component: PageNotFoundComponent },
 ];
 
 @NgModule({

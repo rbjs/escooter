@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SharedService } from './services/shared.service';
 import { delay } from 'rxjs/operators';
@@ -10,7 +10,8 @@ import { AboutComponent } from './about/about.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  public appTitle = "eScooter Lviv"
   constructor(
     private sharedService: SharedService,
     private matDialog: MatDialog

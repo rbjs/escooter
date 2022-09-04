@@ -9,6 +9,7 @@ import {
 import { catchError, map, Observable } from 'rxjs';
 import { SharedService } from '../services/shared.service';
 import { Brands } from '../shared/brands';
+import { Scooter } from '../models/scooter';
 
 @Injectable()
 export class ScootersInterceptor implements HttpInterceptor {
@@ -16,12 +17,9 @@ export class ScootersInterceptor implements HttpInterceptor {
 
   private brandsApi: string[] = Object.keys(Brands);
   private transformBodyResponse(httpEvent: any): any {
-    try {
       const brand = Brands[httpEvent.url];
-      return Brands[httpEvent.url].parse(brand.name, httpEvent.body);
-    } catch (error) {
-      console.error(`Can't parse JSON.`, error);
-    }
+    return Brands[httpEvent.url].parse(brand.name, httpEvent.body)
+      .filter((item: Scooter) => item?.latitude && item?.longitude)
   }
 
   intercept(

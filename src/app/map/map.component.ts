@@ -11,7 +11,7 @@ import {
 } from 'leaflet';
 
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { tap, throttleTime , delay} from 'rxjs/operators';
+import { tap, throttleTime, delay, mergeMap, repeat } from 'rxjs/operators';
 
 import { ScootersService } from '../services/scooters.service';
 import { SharedService } from '../services/shared.service';
@@ -43,7 +43,7 @@ export class MapComponent implements OnInit, OnDestroy {
     private sharedService: SharedService,
     private router: Router,
     private matDialog: MatDialog,
-    private $gaService: GoogleAnalyticsService,
+    private $gaService: GoogleAnalyticsService
   ) {}
 
   // map configuration
@@ -77,14 +77,19 @@ export class MapComponent implements OnInit, OnDestroy {
   // geoLocation
   public map: Map;
   public locateOptions: Control.LocateOptions = {
-    // setView: 'always',
-    showPopup: true,
-    // showCompass: true,
     keepCurrentZoomLevel: true,
+    showPopup: false,
+    // showCompass: true,
+    // keepCurrentZoomLevel: true,
     flyTo: true,
     locateOptions: {
       enableHighAccuracy: true,
       watch: true,
+    },
+    clickBehavior: {
+      inView: 'stop',
+      outOfView: 'setView',
+      inViewNotFollowing: 'setView',
     },
   };
 
@@ -98,19 +103,63 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Sets a map view that contains the given scooters with the maximum zoom level possible.
+  private zoomToShowScootersNearLocation(
+    locationLatLng: any,
+    qtyOfScootersToShow: number = 1
+  ): void {
+    const close_markers = this.markerClusterData
+      .map((m) => [m.getLatLng().distanceTo(locationLatLng), m.getLatLng()])
+      .sort((a, b) => {
+        return a[0] < b[0] ? -1 : 1;
+      })
+      .slice(0, qtyOfScootersToShow + 0.5)
+      .map((d) => d[1]);
+
+    close_markers.push(locationLatLng);
+
+    console.log('>>', close_markers);
+
+    if (close_markers.length > 0) {
+      this.map.flyToBounds(close_markers);
+    }
+  }
+
+  public onMapReady(map: Map) {
+    this.map = map;
+  }
+
   public onNewLocation(location: LocationEvent) {
-    
-    console.log(location);
-    
+    console.log('>', location);
+
+    //ga
     try {
-      this.$gaService.event('location', 'location_accuracy', `${location?.accuracy}`);
+      this.$gaService.event(
+        'location',
+        'location_accuracy',
+        `${location?.accuracy}`
+      );
+
+      this.$gaService.event(
+        'location',
+        'user_location',
+        JSON.stringify({
+          latitude: location?.latlng?.lat,
+          longitude: location?.latlng?.lng,
+          accuracy: location?.accuracy,
+          speed: location?.speed,
+        })
+      );
     } catch (error) {
       console.error(error);
     }
+
+    // iphone Precise Location Off
     if (location?.accuracy > 100) {
-      this.openPreciseLocationDialog();
+      return this.openPreciseLocationDialog();
     }
 
+    this.zoomToShowScootersNearLocation(location.latlng, 2);
   }
 
   private getMarkerPopup(scooter: Scooter): any {
@@ -130,9 +179,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private makeDataLayer(): void {
     const markers = [];
-    this.subscription$[0] = this.scootersService
-      .getScooters()
-      .subscribe((brandNetwork) => {
+    this.subscription$[0] = this.scootersService.getScooters().subscribe({
+      next: (brandNetwork) => {
         brandNetwork.map((scooters) =>
           (scooters as unknown as Scooter[]).map((scooter) => {
             const markerItem = marker([scooter.latitude, scooter.longitude], {
@@ -157,16 +205,20 @@ export class MapComponent implements OnInit, OnDestroy {
         );
 
         this.markerClusterData = [...markers];
-      });
+        // this.zoomToShowScootersNearLocation(this.map.getCenter(), 30);
+      },
+      error: (error) => console.log(error),
+    });
   }
 
   ngOnInit(): void {
     this.subscription$[1] = this.sharedService.cmdReload$
       .pipe(tap(() => this.sharedService.loading$.next(true)))
-      .pipe(delay(400)) 
+      .pipe(delay(400))
       .pipe(tap(() => this.sharedService.loading$.next(false)))
       .pipe(throttleTime(5000))
       .pipe(tap(() => this.sharedService.loading$.next(true)))
+      // .pipe(tap(this.makeDataLayer), delay(1000 * 60 * 5), repeat())
       .subscribe(() => {
         this.makeDataLayer();
       });

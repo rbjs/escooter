@@ -11,7 +11,6 @@ import { NgxLeafletLocateModule } from '@runette/ngx-leaflet-locate';
 import { createCustomElement } from '@angular/elements';
 import { MapPopupComponent } from './map-popup/map-popup.component';
 
-
 import { PreciseLocationComponent } from './precise-location/precise-location.component'
 import { MaterialModule } from '../shared/material.module';
 
