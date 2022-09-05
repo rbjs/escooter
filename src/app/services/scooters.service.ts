@@ -10,6 +10,8 @@ import {
   catchError,
   map,
   retryWhen,
+  delay,
+  repeat,
 } from 'rxjs';
 
 import { Scooter } from '../models/scooter';
@@ -34,16 +36,20 @@ export class ScootersService {
           })
           .pipe(
             retryWhen(genericRetryStrategy()),
-            catchError(error => of(error))
-          )
+            catchError((error) => of(error))
+          );
       })
-    ).pipe(
-      tap((val) =>
-        this.sharedService.lastupdated$.next(
-          new Date(Date.now()).toLocaleTimeString('uk-UA').toString()
+    )
+      // .pipe(delay(1000 * 30), repeat())
+
+      .pipe(
+        tap((val) =>
+          this.sharedService.lastupdated$.next(
+            new Date(Date.now()).toLocaleTimeString('uk-UA').toString()
+          )
         )
-      )
-    );
+      );
+
     //
   }
 }

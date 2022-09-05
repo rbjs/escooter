@@ -135,21 +135,11 @@ export class MapComponent implements OnInit, OnDestroy {
     //ga
     try {
       this.$gaService.event(
-        'location',
-        'location_accuracy',
-        `${location?.accuracy}`
+        'myevent',
+        'mylocation',
+          `${location?.latlng?.lat},${location?.latlng?.lat},${location?.accuracy}`
       );
 
-      this.$gaService.event(
-        'location',
-        'user_location',
-        JSON.stringify({
-          latitude: location?.latlng?.lat,
-          longitude: location?.latlng?.lng,
-          accuracy: location?.accuracy,
-          speed: location?.speed,
-        })
-      );
     } catch (error) {
       console.error(error);
     }
