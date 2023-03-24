@@ -61,9 +61,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private mapTilesLayer = tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
-      // id: 'mapbox/streets-v11',
-      tileSize: 512,
-      zoomOffset: -1,
+      // tileSize: 512,
+      // zoomOffset: -1,
       attribution:
         'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }
