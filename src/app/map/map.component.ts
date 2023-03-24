@@ -59,7 +59,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // );
 
   private mapTilesLayer = tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       // id: 'mapbox/streets-v11',
       tileSize: 512,
