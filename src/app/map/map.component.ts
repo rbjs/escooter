@@ -90,11 +90,11 @@ export class MapComponent implements OnInit, OnDestroy {
     keepCurrentZoomLevel: true,
     showPopup: false,
     // showCompass: true,
-    // keepCurrentZoomLevel: true,
     flyTo: true,
+    // https://leafletjs.com/reference.html#locate-options
     locateOptions: {
       enableHighAccuracy: true,
-      watch: true,
+      watch: false,
     },
     clickBehavior: {
       inView: 'stop',
