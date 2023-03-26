@@ -96,11 +96,11 @@ export class MapComponent implements OnInit, OnDestroy {
       enableHighAccuracy: true,
       watch: false,
     },
-    clickBehavior: {
-      inView: 'stop',
-      outOfView: 'setView',
-      inViewNotFollowing: 'setView',
-    },
+    // clickBehavior: {
+    //   inView: 'stop',
+    //   outOfView: 'setView',
+    //   inViewNotFollowing: 'setView',
+    // },
   };
 
   openPreciseLocationDialog() {
