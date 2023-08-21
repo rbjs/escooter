@@ -3,53 +3,59 @@ import { HttpClient } from '@angular/common/http';
 
 import {
   Observable,
-  forkJoin,
   BehaviorSubject,
   tap,
-  of,
   catchError,
-  map,
-  retryWhen,
   delay,
-  repeat,
+  retry,
+  from,
+  EMPTY,
+  mergeMap,
 } from 'rxjs';
 
 import { Scooter } from '../models/scooter';
 import { Brands } from '../shared/brands';
 import { SharedService } from './shared.service';
-import { genericRetryStrategy } from './rxjs-utils';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScootersService {
-  constructor(private http: HttpClient, private sharedService: SharedService) {}
-
   public data$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
-  getScooters(): Observable<Scooter[]> {
-    return forkJoin(
-      Object.entries(Brands).map((brand) => {
-        return this.http
-          .post<Scooter>(brand[0], {
-            headers: { brand: brand[1].name },
-          })
-          .pipe(
-            retryWhen(genericRetryStrategy()),
-            catchError((error) => of(error))
-          );
-      })
-    )
-      // .pipe(delay(1000 * 30), repeat())
+  private brands = Object.entries(Brands);
+  private delay = 5 * 1000;
 
+  constructor(private http: HttpClient, private sharedService: SharedService) {}
+
+  getScooters(): Observable<Scooter[]> {
+    return from(this.brands)
       .pipe(
-        tap((val) =>
+        tap(() => this.sharedService.loading$.next(true)),
+        mergeMap((brand) => this.makeHttpRequest(brand))
+      )
+      .pipe(
+        tap(() =>
           this.sharedService.lastupdated$.next(
             new Date(Date.now()).toLocaleTimeString('uk-UA').toString()
           )
         )
       );
+  }
 
-    //
+  makeHttpRequest([key, brand]) {
+    return this.http
+      .post<Scooter[]>(
+        `${environment.url}${key}.js`,
+        {},
+        {
+          headers: { brand: brand.name },
+        }
+      )
+      .pipe(
+        // retry({ count: 5, delay: 2000 }),
+        catchError(() => EMPTY)
+      );
   }
 }

@@ -1,24 +1,36 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { SharedService } from './services/shared.service';
-import { delay } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+import { SharedService } from './services/shared.service';
 import { AboutComponent } from './about/about.component';
+
+enum Texts {
+  ERROR_NOT_ONLINE = 'No Internet connection!\nДля коректної роботи додатку необхідне підключення до інтернет.',
+  OK = 'OK',
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public appTitle = "eScooter Lviv"
+  public appTitle = 'eScooter Lviv';
   constructor(
     private sharedService: SharedService,
-    private matDialog: MatDialog
+    private matDialog: MatDialog,
+    private matSnackBar: MatSnackBar
   ) {}
-  private subscription$: Subscription[] = [];
 
-  public lastUpdate: string;
+  private destroy$: Subject<boolean> = new Subject<boolean>();
+
+  public lastUpdated$: Observable<string>;
+  public isLoading$: Observable<boolean>;
+  public isOnline$: Observable<boolean>;
 
   public btnReload() {
     this.sharedService.doReload();
@@ -34,37 +46,24 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  public isOnline: boolean;
-  public loading: boolean;
-
   ngOnInit(): void {
-    this.subscription$[0] = this.sharedService.lastupdated$
-      .pipe(delay(0)) // This prevents a ExpressionChangedAfterItHasBeenCheckedError for subsequent requests
-      .subscribe((lastUpdate) => {
-        this.lastUpdate = lastUpdate;
-        this.sharedService.loading$.next(false);
-      });
+    this.lastUpdated$ = this.sharedService.lastupdated$;
+    this.isLoading$ = this.sharedService.loading$;
+    this.isOnline$ = this.sharedService.checkNetworkStatus();
 
-      this.subscription$[1] =  this.sharedService.loading$
-      .pipe(delay(0)) // This prevents a ExpressionChangedAfterItHasBeenCheckedError for subsequent requests
-        .subscribe((loading) => {
-        this.loading = loading
-      });
-    
-    this.subscription$[2] = this.sharedService
-      .checkNetworkStatus()
-      .subscribe((isOnline) => {
-        this.isOnline = isOnline;
-        if (!this.isOnline) {
-          alert("No Internet connection!\nДля коректної роботи додатку необхідне підключення до інтернет.");
-        }
-      });
-    
-    
-    
+    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe((isOnline) => {
+      let snackBarRef = this.matSnackBar;
+      if (!isOnline) {
+        snackBarRef.open(Texts.ERROR_NOT_ONLINE, Texts.OK);
+      } else {
+        snackBarRef.dismiss();
+        this.sharedService.doReload();
+      }
+    });
   }
 
   ngOnDestroy(): void {
-    this.subscription$.forEach((subscription) => subscription.unsubscribe());
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

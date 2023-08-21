@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  url: `https://proxyapi-phi.vercel.app/api/`,
+  production: false,
+  mapboxToken:
+    'pk.eyJ1IjoiYmlibG9zIiwiYSI6ImNsaHNyZnExOTJucXMzcm9kam5yMnJycmwifQ.l6a51DOPYVFJFZM0umPgoQ',
 };
 
 /*

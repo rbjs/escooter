@@ -1,15 +1,15 @@
 #map {
   height: calc(100% - 4rem);
   padding: 0;
-  outline: none;;
+  outline: none;
 }
 
-:host ::ng-deep .leaflet-popup-close-button {
+::ng-deep .leaflet-popup-close-button {
   display: none;
 }
 
 // Change green to pink, because of Bolt color
-:host ::ng-deep .leaflet-map-pane {
+::ng-deep .leaflet-map-pane {
   .marker-cluster-small {
     background-color: rgba(207, 140, 226, 0.6);
   }
@@ -18,9 +18,13 @@
   }
 }
 
+::ng-deep .leaflet-popup-content {
+  line-height: 1.4rem;
+}
+
 // Bug: Safari Controls disappearing under TileLayer #8068
 // https://github.com/Leaflet/Leaflet/issues/8068
-:host ::ng-deep .leaflet-control-container {
+::ng-deep .leaflet-control-container {
   .leaflet-top,
   .leaflet-left {
     transform: translate3d (0, 0, 0);

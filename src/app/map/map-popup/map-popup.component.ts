@@ -6,11 +6,10 @@ import { DeepLinks } from '../../shared/deeplinks';
 @Component({
   selector: 'app-map-popup',
   templateUrl: './map-popup.component.html',
-  // styleUrls: ['./map-popup.component.scss'],
 })
 export class MapPopupComponent {
   @Input() scooter: Scooter;
-  constructor(private deviceDetectorService: DeviceDetectorService) {}
+  constructor(private deviceDetectorService: DeviceDetectorService) { }
 
   private platform: string;
   private deeplinks: any;

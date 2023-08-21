@@ -1,7 +1,8 @@
 export const Brands = {
-  'https://proxyapi-phi.vercel.app/api/bolt.js': {
+  bolt: {
     name: 'Bolt',
-    parse: (brandname: string, json: any) => {
+    url: '',
+    parseFn: (brandname: string, json: any) => {
       return json.data.data.categories[0].vehicles.map((item: any) => {
         return {
           brand: brandname,
@@ -10,17 +11,16 @@ export const Brands = {
           latitude: item?.lat,
           longitude: item?.lng,
           batteryPercentage: item.charge,
-          distanceOnCharge: +(item.distance_on_charge / 1000).toFixed(3),
+          distanceOnCharge: Number(item.distance_on_charge / 1000).toFixed(3),
         };
       });
     },
   },
-  'https://proxyapi-phi.vercel.app/api/ewings.js': {
+  ewings: {
     name: 'E-wings',
-    parse: (brandname: string, json: any) => {
-      return json.data.data
-        // .filter(item => item?.location)
-        .map((item: any) => {
+    url: '',
+    parseFn: (brandname: string, json: any) => {
+      return json.data.data.map((item: any) => {
         try {
           return {
             brand: brandname,
@@ -30,14 +30,15 @@ export const Brands = {
             longitude: item?.location?.longitude,
             batteryPercentage: Math.round(item?.batteryPercentage * 100),
             distanceOnCharge:
-              +(Math.round(item?.batteryPercentage * 15000) / 1000).toFixed(3) ||
-              item?.estimatedRemainingDistance,
+              Number(
+                Math.round(item?.batteryPercentage * 15000) / 1000
+              ).toFixed(3) || item?.estimatedRemainingDistance,
           };
         } catch (error) {
           console.log('ERROR parsing JSON', item);
           console.error('>>', error);
+          return {};
         }
-        return {};
       });
     },
   },

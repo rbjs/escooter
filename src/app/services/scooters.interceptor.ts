@@ -15,18 +15,22 @@ import { Scooter } from '../models/scooter';
 export class ScootersInterceptor implements HttpInterceptor {
   constructor(private sharedService: SharedService) {}
 
-  private brandsApi: string[] = Object.keys(Brands);
+  private brandKeys: string[] = Object.keys(Brands);
+  private brandKeysPattern = new RegExp(this.brandKeys.join('|'));
+
   private transformBodyResponse(httpEvent: any): any {
-      const brand = Brands[httpEvent.url];
-    return Brands[httpEvent.url].parse(brand.name, httpEvent.body)
-      .filter((item: Scooter) => item?.latitude && item?.longitude)
+    const key = this.brandKeys.find((key) => httpEvent.url.includes(key));
+    const brand = Brands[key];
+    return brand
+      .parseFn(brand.name, httpEvent.body)
+      .filter((item: Scooter) => item?.latitude && item?.longitude);
   }
 
   intercept(
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    if (this.brandsApi.includes(request.url)) {
+    if (this.brandKeysPattern.test(request.url)) {
       return next.handle(request).pipe(
         map((event: HttpEvent<unknown>) => {
           if (event instanceof HttpResponse) {

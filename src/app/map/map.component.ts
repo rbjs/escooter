@@ -7,11 +7,10 @@ import {
   Map,
   Control,
   LocationEvent,
-  control,
 } from 'leaflet';
 
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { tap, throttleTime, delay, mergeMap, repeat } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { takeUntil, catchError, mergeMap } from 'rxjs/operators';
 
 import { ScootersService } from '../services/scooters.service';
 import { SharedService } from '../services/shared.service';
@@ -20,12 +19,12 @@ import { Scooter } from '../models/scooter';
 
 import { NgElement, WithProperties } from '@angular/elements';
 import { MapPopupComponent } from './map-popup/map-popup.component';
-import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { PreciseLocationComponent } from './precise-location/precise-location.component';
 
 import { GoogleAnalyticsService } from 'ngx-google-analytics';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-map',
@@ -33,38 +32,27 @@ import { GoogleAnalyticsService } from 'ngx-google-analytics';
   styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements OnInit, OnDestroy {
-  @Input()
   reloadCmd$ = new Subject<Event>();
 
-  private subscription$: Subscription[] = [];
+  private destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private scootersService: ScootersService,
     private sharedService: SharedService,
-    private router: Router,
     private matDialog: MatDialog,
     private $gaService: GoogleAnalyticsService
   ) {}
 
   // map configuration
-  // private mapTilesLayer = tileLayer(
-  //   'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-  //   {
-  //     id: 'mapbox/streets-v11',
-  //     tileSize: 512,
-  //     zoomOffset: -1,
-  //     attribution:
-  //       'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-  //   }
-  // );
-
   private mapTilesLayer = tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' +
+      environment.mapboxToken,
     {
-      // tileSize: 512,
-      // zoomOffset: -1,
+      id: 'mapbox/streets-v11',
+      tileSize: 512,
+      zoomOffset: -1,
       attribution:
-        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     }
   );
 
@@ -176,54 +164,50 @@ export class MapComponent implements OnInit, OnDestroy {
     return popupEl;
   }
 
-  private makeDataLayer(): void {
-    const markers = [];
-    this.subscription$[0] = this.scootersService.getScooters().subscribe({
-      next: (brandNetwork) => {
-        brandNetwork.map((scooters) =>
-          (scooters as unknown as Scooter[]).map((scooter) => {
-            const markerItem = marker([scooter.latitude, scooter.longitude], {
-              icon: icon({
-                iconUrl: `/assets/icons/marker-icon-${scooter.color}.png`,
-                iconRetinaUrl: `/assets/icons/marker-icon-2x-${scooter.color}.png`,
-                shadowUrl: 'leaflet/marker-shadow.png',
-                tooltipAnchor: [16, -28],
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41],
-                className: scooter.brand,
-              }),
-            }).bindPopup(() => this.getMarkerPopup(scooter), {
-              autoClose: true,
-              closeButton: false,
-            });
-
-            markers.push(markerItem);
-          })
-        );
-
-        this.markerClusterData = [...markers];
-        // this.zoomToShowScootersNearLocation(this.map.getCenter(), 30);
-      },
-      error: (error) => console.log(error),
+  private showMapWithScooters(scooters: Scooter[]): void {
+    scooters.map((scooter: Scooter) => {
+      const markerItem = marker([scooter.latitude, scooter.longitude], {
+        icon: icon({
+          iconUrl: `/assets/icons/marker-icon-${scooter.color}.png`,
+          iconRetinaUrl: `/assets/icons/marker-icon-2x-${scooter.color}.png`,
+          shadowUrl: 'leaflet/marker-shadow.png',
+          tooltipAnchor: [16, -28],
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+          className: scooter.brand,
+        }),
+      }).bindPopup(() => this.getMarkerPopup(scooter), {
+        autoClose: true,
+        closeButton: false,
+      });
+      this.markerClusterData = [...this.markerClusterData, markerItem];
     });
+    // this.markerClusterData = [...markers];
+    this.sharedService.loading$.next(false);
   }
 
   ngOnInit(): void {
-    this.subscription$[1] = this.sharedService.cmdReload$
-      .pipe(tap(() => this.sharedService.loading$.next(true)))
-      .pipe(delay(400))
-      .pipe(tap(() => this.sharedService.loading$.next(false)))
-      .pipe(throttleTime(5000))
-      .pipe(tap(() => this.sharedService.loading$.next(true)))
-      // .pipe(tap(this.makeDataLayer), delay(1000 * 60 * 5), repeat())
-      .subscribe(() => {
-        this.makeDataLayer();
+    this.sharedService.cmdReload$
+      .pipe(
+        mergeMap(() =>
+          this.scootersService
+            .getScooters()
+            // .pipe(tap(this.makeDataLayer), delay(1000 * 60 * 5), repeat())
+            .pipe(takeUntil(this.destroy$))
+        )
+      )
+      .subscribe((scooters) => {
+        if (!scooters) {
+          return;
+        }
+        this.showMapWithScooters(scooters);
       });
   }
 
   ngOnDestroy(): void {
-    this.subscription$.forEach((subscription) => subscription.unsubscribe());
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

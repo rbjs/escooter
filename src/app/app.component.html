@@ -9,9 +9,9 @@
   </button>
   <span (click)="openDialog()">{{ appTitle }}</span>
   <span class="toolbar-spacer"></span>
-  <small (click)="btnReload()">{{ lastUpdate }}</small> &nbsp;
+  <small (click)="btnReload()">{{ lastUpdated$ | async }}</small> &nbsp;
   <button mat-icon-button aria-label="Оновити дані" (click)="btnReload()">
-    <mat-icon [class]="loading ? 'rotating' : ''">sync</mat-icon>
+    <mat-icon [class.rotating]="isLoading$ | async">sync</mat-icon>
   </button>
 </mat-toolbar>
 <router-outlet></router-outlet>
