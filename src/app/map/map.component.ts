@@ -52,7 +52,7 @@ export class MapComponent implements OnInit, OnDestroy {
       tileSize: 512,
       zoomOffset: -1,
       attribution:
-        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, © <a href="https://www.mapbox.com/" target="_blank">Mapbox</a>',
     }
   );
 
@@ -165,6 +165,15 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   private showMapWithScooters(scooters: Scooter[]): void {
+    if (!scooters.at(0).brand) {
+      return;
+    }
+
+    const markers = this.markerClusterData.filter(
+      (s) => s.brand !== scooters.at(0).brand
+    );
+    this.markerClusterData = [];
+
     scooters.map((scooter: Scooter) => {
       const markerItem = marker([scooter.latitude, scooter.longitude], {
         icon: icon({
@@ -182,9 +191,12 @@ export class MapComponent implements OnInit, OnDestroy {
         autoClose: true,
         closeButton: false,
       });
-      this.markerClusterData = [...this.markerClusterData, markerItem];
+      markerItem['brand'] = scooter.brand;
+      markers.push(markerItem);
     });
-    // this.markerClusterData = [...markers];
+
+    this.markerClusterData = [...markers];
+
     this.sharedService.loading$.next(false);
   }
 
@@ -203,6 +215,7 @@ export class MapComponent implements OnInit, OnDestroy {
           return;
         }
         this.showMapWithScooters(scooters);
+        console.log(scooters.at(0).brand, scooters.length);
       });
   }
 

@@ -1,27 +1,30 @@
 # escooter
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.1.1.
+Ніколи так не віриш у справедливість Закону Мерфі, як під час пошуку електросамоката у годину пік. Блукати далеко бажання нема, а перемикатись між застосунками оренди у надії, що хтось залишить поруч, з часом дратує.
 
-## Development server
+З цього досвіду виникла ідея показати на одній карті всі електросамокати міста Львова незалежно від застосунків оренди.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+eScooter / lviv – зручний пошук електросамоката у Львові
+https://rbjs.github.io/escooter/
 
-## Code scaffolding
+# features
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Створено web app з картою міста Львова
+- Актуальні локації електросамокатів Bolt та eWings відображаються на карті
+- Для кожного самокату доступна інформація про заряд батареї та приблизний запас ходу
+- Індикатор часу останнього оновлення даних, можливість примусового оновлення
+- Одразу зробити замовлення / бронювання самоката, на жаль, технічна можливість відсутня, проте за кнопкою [Перейти] автоматично відкривається відповідний застосунок оренди
+- Круги з цифрами показують кластери розташованих поруч самокатів. Якщо клацнути на круг, карта масштабується так, щоб кожен самокат був видний окремо.
+- Якщо скористатись геолокацією, карта масштабується таким чином аби показати вашу локацію та принаймні один самокат поруч.
 
-## Build
+# todo
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- доробити PWA
+- фонове автоматичне оновлення
+- service worker для карти оффлайн
+- відстеження появи вільного самоката у визначеному радіусі від користувача
+- BikeUA надайте, будь ласка, АРІ -> rbjsxx@gmail.com
 
-## Running unit tests
+## techstack
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+FE: Angular v14, Leaflet, OpenStreetMap, Mapbox, Mobile Deep Links.

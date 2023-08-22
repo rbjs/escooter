@@ -19,7 +19,6 @@ enum Texts {
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public appTitle = 'eScooter Lviv';
   constructor(
     private sharedService: SharedService,
     private matDialog: MatDialog,
