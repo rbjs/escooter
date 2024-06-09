@@ -1,0 +1,33 @@
+<div class="content">
+  <h1>{{ brand | uppercase }}</h1>
+  <p>
+    Якщо не відбулося автоматичного перенаправлення у додаток оренди самокатів,
+    ймовірно, необхідно встановити цей додаток:
+  </p>
+  <ul>
+    <li>
+      <a href="{{ deeplinks.appstore }}">
+        <img
+          width="107"
+          height="37"
+          src="/assets/app-store.svg"
+          alt="AppStore"
+          loading="lazy"
+      /></a>
+    </li>
+    <li>
+      <a href="{{ deeplinks.playmarket }}">
+        <img
+          width="107"
+          height="37"
+          src="/assets/google-play.svg"
+          alt="Google Play"
+          loading="lazy"
+      /></a>
+    </li>
+  </ul>
+
+  <button mat-stroked-button color="primary" [routerLink]="['/']">
+    Повернутись до карти
+  </button>
+</div>

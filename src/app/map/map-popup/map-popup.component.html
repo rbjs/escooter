@@ -1,0 +1,9 @@
+<b>{{ scooter.brand | uppercase }}</b>
+<div>name: {{ scooter.name }}</div>
+<div>battery: {{ scooter.batteryPercentage }}%</div>
+<div>max distance: {{ scooter.distanceOnCharge }} km</div>
+<p>
+  <button mat-stroked-button color="primary" (click)="openApp()">
+    Перейти до {{ scooter.brand | uppercase }}
+  </button>
+</p>

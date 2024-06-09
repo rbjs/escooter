@@ -1,0 +1,11 @@
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.rotating {
+  animation: rotate 1.5s linear infinite; 
+  color: white;
+}
+@keyframes rotate{
+  to{ transform: rotate(360deg); }
+}

@@ -1,0 +1,17 @@
+<div
+  id="map"
+  leaflet
+  [leafletOptions]="mapOptions"
+  (leafletMapReady)="onMapReady($event)"
+  [leafletMarkerCluster]="markerClusterData"
+  [leafletMarkerClusterOptions]="markerClusterOptions"
+></div>
+<!-- 
+  [leafletLayers]="mapLayers"
+-->
+<leaflet-locate-control
+  [map]="map"
+  [options]="locateOptions"
+  (location$)="onNewLocation($event)"
+></leaflet-locate-control>
+
